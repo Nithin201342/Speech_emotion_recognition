@@ -1,0 +1,64 @@
+# ============================
+# Python
+# ============================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+eggs/
+*.egg
+
+# ============================
+# Virtual Environments
+# ============================
+venv/
+env/
+.env
+.venv/
+
+# ============================
+# Jupyter Notebooks
+# ============================
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ============================
+# IDE / Editor
+# ============================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ============================
+# OS Files
+# ============================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============================
+# ML / Data (large files)
+# ============================
+data/
+models/*.pkl
+models/*.h5
+models/*.pt
+models/*.pth
+models/*.joblib
+outputs/
+*.wav
+*.mp3
+*.flac
+
+# ============================
+# Miscellaneous
+# ============================
+*.log
+*.csv
+*.zip
+*.tar.gz
