@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🎙️ AI Speech Emotion Recognition System
 
 > Detect human emotions from speech audio using Machine Learning and Deep Learning.
@@ -180,3 +181,6 @@ This project is for educational and hackathon purposes.
 ---
 
 *Built with ❤️ for the MCA Hackathon — Day 1 of 7*
+=======
+# speech_emotion_recognition
+>>>>>>> 697082aac9eada2d4dec7d661a6bb103f96fe46e
