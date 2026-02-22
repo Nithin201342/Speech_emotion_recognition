@@ -167,7 +167,7 @@ print(f"\nDuration statistics:\n{df['duration_sec'].describe().to_string()}")
 
 # %%
 # Pick one random sample per emotion for reproducibility
-samples = df.groupby("emotion_label").apply(lambda x: x.sample(1, random_state=42)).reset_index(drop=True)
+samples = df.groupby("emotion_label", group_keys=False).apply(lambda x: x.sample(1, random_state=42)).reset_index(drop=True)
 
 fig, axes = plt.subplots(4, 2, figsize=(16, 14))
 axes = axes.flatten()
