@@ -8,11 +8,13 @@ Steps:
   4. Split into train set (80%) and test set (20%)
   5. Scale features so they are on the same range
   6. Save everything as .npy files in data/processed/
+  7. Save the scaler to models/scaler.pkl for use in prediction
 """
 
 import os
 import sys
 import numpy as np
+import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
@@ -124,6 +126,11 @@ def main():
     X_test = scaler.transform(X_test)
 
     print("    Features scaled successfully.")
+
+    # Save the scaler so predict.py can apply the exact same scaling to new audio
+    os.makedirs("models", exist_ok=True)
+    joblib.dump(scaler, "models/scaler.pkl")
+    print("    Scaler saved to: models/scaler.pkl")
 
     # -----------------------------------------------------------------------
     # Step 6: Save everything to the output folder
