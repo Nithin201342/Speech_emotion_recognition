@@ -70,8 +70,8 @@ def predict_emotion(audio_path, model, scaler, label_classes):
 
 
 # Set up session state to track if result should be cleared
-if "clear" not in st.session_state:
-    st.session_state.clear = False
+if "result_cleared" not in st.session_state:
+    st.session_state.result_cleared = False
 
 
 # Page header
@@ -86,15 +86,15 @@ st.markdown("""
 
 # File uploader — hidden if clear was just clicked
 uploaded_file = None
-if not st.session_state.clear:
+if not st.session_state.result_cleared:
     st.markdown('<p style="font-size:0.75rem; font-weight:600; text-transform:uppercase; '
                 'letter-spacing:0.07em; color:#6c757d; margin-bottom:4px;">Upload Audio</p>',
                 unsafe_allow_html=True)
     uploaded_file = st.file_uploader("Choose a .wav file", type=["wav"])
 
 if uploaded_file is not None:
-    # Reset the clear flag since a new file is loaded
-    st.session_state.clear = False
+    # Reset the flag since a new file is loaded
+    st.session_state.result_cleared = False
 
     # Save the uploaded file temporarily
     temp_path = "temp_audio.wav"
@@ -159,17 +159,17 @@ if uploaded_file is not None:
 
         # Clear Result button — resets the app to default state
         if st.button("🗑️ Clear Result"):
-            st.session_state.clear = True
+            st.session_state.result_cleared = True
             st.rerun()
 
     else:
         st.error("Could not process the audio file. Please try a different .wav file.")
 
-elif st.session_state.clear:
+elif st.session_state.result_cleared:
     # Show a message and a button to upload again after clearing
     st.info("Result cleared. Upload a new audio file to start again.")
     if st.button("Upload New File"):
-        st.session_state.clear = False
+        st.session_state.result_cleared = False
         st.rerun()
 
 # Model Information card
