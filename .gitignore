@@ -44,8 +44,11 @@ desktop.ini
 # ============================
 # ML / Data (large files)
 # ============================
-data/
-models/*.pkl
+# Raw audio dataset (too large for Git)
+data/Actor_*/
+# Processed files needed by the app are tracked (small: <2MB total)
+# data/processed/ is intentionally NOT ignored
+# Large / alternative model formats
 models/*.h5
 models/*.pt
 models/*.pth
