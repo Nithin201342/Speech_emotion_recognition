@@ -9,7 +9,7 @@ import streamlit as st
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
 from extract_features import extract_features
 
-st.set_page_config(page_title="Speech Emotion Recognition", layout="centered")
+st.set_page_config(page_title="Speech Emotion Recognition", layout="wide")
 
 # Load Bootstrap 5 and Poppins font, then apply minimal custom overrides
 HEAD = """
@@ -19,7 +19,7 @@ HEAD = """
 html, body, [class*="css"], .stApp { font-family: 'Poppins', sans-serif !important; }
 #MainMenu { visibility: hidden; }
 footer { visibility: hidden; }
-.block-container { padding-top: 2rem !important; max-width: 720px; }
+.block-container { padding-top: 1.5rem !important; padding-bottom: 0.5rem !important; max-width: 1100px; }
 </style>
 """
 st.markdown(HEAD, unsafe_allow_html=True)
@@ -76,7 +76,7 @@ if "result_cleared" not in st.session_state:
 
 # Page header
 st.markdown("""
-<div style="padding:1rem 0 0.5rem 0; border-bottom:2px solid #dee2e6; margin-bottom:1.25rem;">
+<div style="padding:0.5rem 0 0.75rem 0; border-bottom:2px solid #dee2e6; margin-bottom:1rem;">
   <h4 style="font-weight:700; color:#1a1a2e; margin:0;">Speech Emotion Recognition</h4>
   <p style="color:#6c757d; font-size:0.9rem; margin:4px 0 0 0;">
     Upload a .wav audio file to detect the emotion from speech.
@@ -84,43 +84,92 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# File uploader — hidden if clear was just clicked
-uploaded_file = None
-if not st.session_state.result_cleared:
-    st.markdown('<p style="font-size:0.75rem; font-weight:600; text-transform:uppercase; '
-                'letter-spacing:0.07em; color:#6c757d; margin-bottom:4px;">Upload Audio</p>',
-                unsafe_allow_html=True)
-    uploaded_file = st.file_uploader("Choose a .wav file", type=["wav"])
+# Two-column layout: left = upload + model info, right = results
+left_col, right_col = st.columns([1, 1.2], gap="large")
 
-if uploaded_file is not None:
-    # Reset the flag since a new file is loaded
-    st.session_state.result_cleared = False
+# ── LEFT COLUMN ──────────────────────────────────────────────
+with left_col:
 
-    # Save the uploaded file temporarily
-    temp_path = "temp_audio.wav"
-    with open(temp_path, "wb") as f:
-        f.write(uploaded_file.getbuffer())
+    # File uploader section
+    uploaded_file = None
+    if not st.session_state.result_cleared:
+        st.markdown('<p style="font-size:0.75rem; font-weight:600; text-transform:uppercase; '
+                    'letter-spacing:0.07em; color:#6c757d; margin-bottom:4px;">Upload Audio</p>',
+                    unsafe_allow_html=True)
+        uploaded_file = st.file_uploader("Choose a .wav file", type=["wav"])
 
-    # Audio preview
-    st.markdown('<p style="font-size:0.75rem; font-weight:600; text-transform:uppercase; '
-                'letter-spacing:0.07em; color:#6c757d; margin:1rem 0 4px 0;">Audio Preview</p>',
-                unsafe_allow_html=True)
-    st.audio(temp_path, format="audio/wav")
+    elif st.session_state.result_cleared:
+        st.info("Result cleared. Upload a new file to start again.")
+        if st.button("Upload New File"):
+            st.session_state.result_cleared = False
+            st.rerun()
 
-    # Run prediction
-    with st.spinner("Analysing audio..."):
-        predicted_emotion, probabilities = predict_emotion(temp_path, model, scaler, label_classes)
+    # Model Information card — always visible on the left
+    model_info    = read_model_info()
+    model_type    = model_info.get("model_type", "Random Forest")
+    n_trees       = model_info.get("n_estimators", "100")
+    test_accuracy = model_info.get("test_accuracy", "N/A")
 
-    if os.path.exists(temp_path):
-        os.remove(temp_path)
+    st.markdown(f"""
+<div class="card" style="margin-top:1.2rem; border-left:4px solid #198754;">
+  <div class="card-body" style="padding:0.9rem 1rem;">
+    <p style="font-size:0.7rem; font-weight:600; text-transform:uppercase;
+              letter-spacing:0.08em; color:#6c757d; margin-bottom:8px;">Model Information</p>
+    <table style="width:100%; font-size:0.85rem; border-collapse:collapse;">
+      <tr>
+        <td style="padding:3px 0; color:#495057; font-weight:500; width:140px;">Model Type</td>
+        <td style="padding:3px 0; color:#212529;">{model_type}</td>
+      </tr>
+      <tr>
+        <td style="padding:3px 0; color:#495057; font-weight:500;">Number of Trees</td>
+        <td style="padding:3px 0; color:#212529;">{n_trees}</td>
+      </tr>
+      <tr>
+        <td style="padding:3px 0; color:#495057; font-weight:500;">Test Accuracy</td>
+        <td style="padding:3px 0; color:#198754; font-weight:600;">{test_accuracy}%</td>
+      </tr>
+    </table>
+    <p style="font-size:0.78rem; color:#6c757d; margin:8px 0 0 0;">
+      Trained using extracted audio features like MFCC and Chroma.
+    </p>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
-    if predicted_emotion:
-        confidence = probabilities[list(label_classes).index(predicted_emotion)] * 100
+# ── RIGHT COLUMN ─────────────────────────────────────────────
+with right_col:
 
-        # Prediction result card
-        st.markdown(f"""
+    if uploaded_file is not None:
+        # Reset flag since a new file is loaded
+        st.session_state.result_cleared = False
+
+        # Save uploaded file temporarily
+        temp_path = "temp_audio.wav"
+        with open(temp_path, "wb") as f:
+            f.write(uploaded_file.getbuffer())
+
+        # Audio preview
+        st.markdown('<p style="font-size:0.75rem; font-weight:600; text-transform:uppercase; '
+                    'letter-spacing:0.07em; color:#6c757d; margin-bottom:4px;">Audio Preview</p>',
+                    unsafe_allow_html=True)
+        st.audio(temp_path, format="audio/wav")
+
+        # Run prediction
+        with st.spinner("Analysing audio..."):
+            predicted_emotion, probabilities = predict_emotion(
+                temp_path, model, scaler, label_classes
+            )
+
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+
+        if predicted_emotion:
+            confidence = probabilities[list(label_classes).index(predicted_emotion)] * 100
+
+            # Prediction result card
+            st.markdown(f"""
 <div class="card mb-3" style="border-left:4px solid #0d6efd;">
-  <div class="card-body">
+  <div class="card-body" style="padding:0.9rem 1rem;">
     <p style="font-size:0.7rem; font-weight:600; text-transform:uppercase;
               letter-spacing:0.08em; color:#6c757d; margin-bottom:6px;">Prediction Result</p>
     <h3 style="font-weight:700; color:#0d6efd; margin:0;">{predicted_emotion.capitalize()}</h3>
@@ -131,14 +180,16 @@ if uploaded_file is not None:
 </div>
 """, unsafe_allow_html=True)
 
-        # Probability breakdown card with progress bars for each emotion
-        sorted_pairs = sorted(zip(label_classes, probabilities), key=lambda x: x[1], reverse=True)
+            # Probability breakdown card
+            sorted_pairs = sorted(
+                zip(label_classes, probabilities), key=lambda x: x[1], reverse=True
+            )
 
-        rows = ""
-        for label, prob in sorted_pairs:
-            pct       = prob * 100
-            bar_color = "#0d6efd" if label == predicted_emotion else "#ced4da"
-            rows += f"""
+            rows = ""
+            for label, prob in sorted_pairs:
+                pct       = prob * 100
+                bar_color = "#0d6efd" if label == predicted_emotion else "#ced4da"
+                rows += f"""
 <div class="d-flex align-items-center gap-2 mb-2">
   <span style="width:90px; font-size:0.82rem; font-weight:500; color:#343a40;">{label.capitalize()}</span>
   <div class="flex-grow-1 bg-light rounded" style="height:9px;">
@@ -147,9 +198,9 @@ if uploaded_file is not None:
   <span style="width:42px; font-size:0.8rem; color:#6c757d; text-align:right;">{pct:.1f}%</span>
 </div>"""
 
-        st.markdown(f"""
-<div class="card mb-3">
-  <div class="card-body">
+            st.markdown(f"""
+<div class="card mb-2">
+  <div class="card-body" style="padding:0.9rem 1rem;">
     <p style="font-size:0.7rem; font-weight:600; text-transform:uppercase;
               letter-spacing:0.08em; color:#6c757d; margin-bottom:10px;">Probability Breakdown</p>
     {rows}
@@ -157,48 +208,23 @@ if uploaded_file is not None:
 </div>
 """, unsafe_allow_html=True)
 
-        # Clear Result button — resets the app to default state
-        if st.button("🗑️ Clear Result"):
-            st.session_state.result_cleared = True
-            st.rerun()
+            # Clear Result button
+            if st.button("🗑️ Clear Result"):
+                st.session_state.result_cleared = True
+                st.rerun()
+
+        else:
+            st.error("Could not process the audio file. Please try a different .wav file.")
 
     else:
-        st.error("Could not process the audio file. Please try a different .wav file.")
-
-elif st.session_state.result_cleared:
-    # Show a message and a button to upload again after clearing
-    st.info("Result cleared. Upload a new audio file to start again.")
-    if st.button("Upload New File"):
-        st.session_state.result_cleared = False
-        st.rerun()
-
-# Model Information card
-model_info = read_model_info()
-model_type    = model_info.get("model_type", "Random Forest")
-n_trees       = model_info.get("n_estimators", "100")
-test_accuracy = model_info.get("test_accuracy", "N/A")
-
-st.markdown(f"""
-<div class="card mb-3" style="margin-top:1.5rem; border-left:4px solid #198754;">
-  <div class="card-body">
-    <p style="font-size:0.7rem; font-weight:600; text-transform:uppercase;
-              letter-spacing:0.08em; color:#6c757d; margin-bottom:10px;">Model Information</p>
-    <table style="width:100%; font-size:0.88rem; border-collapse:collapse;">
-      <tr>
-        <td style="padding:4px 0; color:#495057; font-weight:500; width:150px;">Model Type</td>
-        <td style="padding:4px 0; color:#212529;">{model_type}</td>
-      </tr>
-      <tr>
-        <td style="padding:4px 0; color:#495057; font-weight:500;">Number of Trees</td>
-        <td style="padding:4px 0; color:#212529;">{n_trees}</td>
-      </tr>
-      <tr>
-        <td style="padding:4px 0; color:#495057; font-weight:500;">Test Accuracy</td>
-        <td style="padding:4px 0; color:#198754; font-weight:600;">{test_accuracy}%</td>
-      </tr>
-    </table>
-    <p style="font-size:0.8rem; color:#6c757d; margin:10px 0 0 0;">
-      This model was trained using extracted audio features like MFCC and Chroma.
+        # Placeholder shown before any file is uploaded
+        st.markdown("""
+<div style="height:100%; display:flex; align-items:center; justify-content:center;
+            border:2px dashed #dee2e6; border-radius:8px; padding:2rem; text-align:center; margin-top:0.5rem;">
+  <div>
+    <p style="font-size:1.8rem; margin:0;">🎙️</p>
+    <p style="color:#adb5bd; font-size:0.88rem; margin:8px 0 0 0;">
+      Upload a .wav file on the left<br>to see the prediction here.
     </p>
   </div>
 </div>
@@ -207,7 +233,7 @@ st.markdown(f"""
 # Footer
 st.markdown("""
 <div style="text-align:center; font-size:0.75rem; color:#adb5bd;
-            border-top:1px solid #dee2e6; padding-top:1rem; margin-top:1.5rem;">
+            border-top:1px solid #dee2e6; padding-top:0.75rem; margin-top:1rem;">
   Speech Emotion Recognition &nbsp;&bull;&nbsp; RAVDESS Dataset &nbsp;&bull;&nbsp; Random Forest Model
 </div>
 """, unsafe_allow_html=True)
