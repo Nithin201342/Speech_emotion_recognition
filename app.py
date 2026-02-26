@@ -19,7 +19,7 @@ HEAD = """
 html, body, [class*="css"], .stApp { font-family: 'Poppins', sans-serif !important; }
 #MainMenu { visibility: hidden; }
 footer { visibility: hidden; }
-.block-container { padding-top: 1.5rem !important; padding-bottom: 0.5rem !important; max-width: 1100px; }
+.block-container { padding-top: 1.5rem !important; padding-bottom: 0.5rem !important; padding-left: 3rem !important; padding-right: 3rem !important; max-width: 1100px; }
 </style>
 """
 st.markdown(HEAD, unsafe_allow_html=True)
