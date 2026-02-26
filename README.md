@@ -1,4 +1,4 @@
-# 🎙️ AI Speech Emotion Recognition System
+# AI Speech Emotion Recognition System
 
 > Detect human emotions from speech audio using Machine Learning.
 
@@ -8,20 +8,20 @@
 
 ---
 
-## 📌 Problem Statement
+## Problem Statement
 
 Human communication is rich with emotional cues embedded in how words are spoken — not just what is said. Traditional text-based sentiment analysis misses prosodic features like pitch, tone, tempo, and energy that carry critical emotional information.
 
 **Goal:** Build a system that can automatically recognise emotions (neutral, calm, happy, sad, angry, fearful, disgust, surprised) from short speech clips, enabling applications in:
 
-- 🏥 Mental health monitoring
-- 📞 Call-centre quality analysis
-- 🤖 Emotionally aware voice assistants
-- 🎓 E-learning engagement tracking
+- Mental health monitoring
+- Call-centre quality analysis
+- Emotionally aware voice assistants
+- E-learning engagement tracking
 
 ---
 
-## 💡 Proposed Solution
+## Proposed Solution
 
 An end-to-end pipeline that:
 
@@ -33,38 +33,24 @@ An end-to-end pipeline that:
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 ```
-┌──────────────┐     ┌──────────────────┐     ┌────────────────┐
-│  Raw Audio   │────▶│  Feature         │────▶│  Random Forest │
-│  (.wav)      │     │  Extraction      │     │  Classifier    │
-└──────────────┘     │  (MFCC, Mel,     │     └───────┬────────┘
-                     │   Chroma, ZCR)   │             │
-                     └──────────────────┘             ▼
-                                               ┌───────────────┐
-                                               │  Prediction:  │
-                                               │  "angry" 😠   │
-                                               └───────────────┘
++--------------+     +------------------+     +----------------+
+|  Raw Audio   |---->|  Feature         |---->|  Random Forest |
+|  (.wav)      |     |  Extraction      |     |  Classifier    |
++--------------+     |  (MFCC, Mel,     |     +-------+--------+
+                     |   Chroma, ZCR)   |             |
+                     +------------------+             v
+                                              +---------------+
+                                              |  Prediction:  |
+                                              |  e.g. "angry" |
+                                              +---------------+
 ```
 
 ---
 
-## 📅 7-Day Development Roadmap
-
-| Day | Focus Area | Key Deliverables | Status |
-|-----|-----------|-----------------|--------|
-| **1** | Project Setup & EDA | Folder structure, data loader, visualisations, README | ✅ Done |
-| **2** | Feature Engineering | MFCC, chroma, Mel spectrogram extraction pipeline | ✅ Done |
-| **3** | ML Model Training | Random Forest — train & evaluate | ✅ Done |
-| **4** | Prediction Script | `predict.py` — predict emotion from any `.wav` file | ✅ Done |
-| **5** | Evaluation Plots | Confusion matrix & per-emotion accuracy charts | ✅ Done |
-| **6** | Web Interface | Streamlit app — upload audio → get prediction | ✅ Done |
-| **7** | Final Polish | Documentation, README update, final commit | ✅ Done |
-
----
-
-## 📂 Project Structure
+## Project Structure
 
 ```
 Speech_emotion_recognition/
@@ -95,7 +81,7 @@ Speech_emotion_recognition/
 
 ---
 
-## 🗃️ Dataset — RAVDESS
+## Dataset — RAVDESS
 
 **Ryerson Audio-Visual Database of Emotional Speech and Song**
 
@@ -117,7 +103,7 @@ Speech_emotion_recognition/
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
@@ -131,7 +117,7 @@ Speech_emotion_recognition/
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # 1. Clone the repository
@@ -163,7 +149,7 @@ streamlit run app.py
 
 ---
 
-## 📊 Results
+## Results
 
 - **Model:** Random Forest (100 trees)
 - **Features:** MFCC (40) + Chroma (12) + Mel Spectrogram (128) + ZCR (1) + RMS (1) = **182 features**
@@ -173,10 +159,10 @@ streamlit run app.py
 
 ---
 
-## 📝 License
+## License
 
 This project is for educational and hackathon purposes.
 
 ---
 
-*Built with ❤️ for the MCA Hackathon — 7-Day Sprint*
+*Built for the MCA Hackathon*
